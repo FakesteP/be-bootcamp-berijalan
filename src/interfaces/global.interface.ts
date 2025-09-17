@@ -1,3 +1,5 @@
+import { Request } from "express";
+
 export interface IGlobalResponse<T = unknown> {
   status: boolean;
   message: string;
@@ -44,5 +46,14 @@ export interface IDeleteResponse {
   name: string;
   deletedAt: Date | null;
 }
+
+export interface CacheOptions {
+  ttl?: number; 
+  keyPrefix?: string; 
+  skipCacheIf?: (req: Request) => boolean;
+  invalidateOnMethods?: string[]; 
+}
+
+
 
 export type TGlobalResponse<T = unknown> = IGlobalResponse<T>;

@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { SDelete, SLogin, SRegister, SUpdate } from "../services/auth.service";
+import { SDelete, SGetAllAdmins, SLogin, SRegister, SUpdate } from "../services/auth.service";
 
 export const CLogin = async (
   req: Request,
@@ -53,6 +53,20 @@ export const CDelete = async (
   try {
     const id = Number(req.params.id);
     const result = await SDelete(id);
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// admin controller
+export const CGetAllAdmins = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const result = await SGetAllAdmins();
     res.status(200).json(result);
   } catch (error) {
     next(error);

@@ -1,4 +1,8 @@
 ### Pengujian API menggunakan REST Client
+
+GET http://localhost:3000/api/v1/auth/admin
+
+
 ### Login admin
 POST http://localhost:3000/api/v1/auth/login
 Content-Type: application/json
@@ -13,10 +17,10 @@ POST http://localhost:3000/api/v1/auth/create
 Content-Type: application/json
 
 {
-  "username": "mejiku",
-  "password": "awalnyaku",
-  "email": "hibiniu@yahoo.com",
-  "name": "Tenxii"
+  "username": "hirojin",
+  "password": "FakesteP#666",
+  "email": "xxrabka@gmail.com",
+  "name": "Hirooo"
 }
 
 ### Update Admin

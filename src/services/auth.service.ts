@@ -2,7 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 import { IDeleteResponse, IGlobalResponse, IUpdateResponse } from "../interfaces/global.interface";
 import { ILoginResponse } from "../interfaces/global.interface";
-import { UGenerateToken } from "../utils/UGenerateToken";
+import { UGenerateToken } from "../utils/jwt.util";
 
 const prisma = new PrismaClient();
 
@@ -146,3 +146,29 @@ export const SDelete = async (
     data: admin,
   };
 }
+
+export const SGetAllAdmins = async (): Promise<IGlobalResponse> => {
+  const admins = await prisma.admin.findMany({
+    where: {
+      deletedAt: null,
+    },
+    select: {
+      id: true,
+      username: true,
+      email: true,
+      name: true,
+      isActive: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  return {
+    status: true,
+    message: "Admins retrieved successfully",
+    data: admins,
+  };
+};
