@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { CacheOptions } from "../interfaces/global.interface";
+import { CacheOptions } from "../interfaces/cache.interface";
 import crypto from "crypto";
 import { redisClient } from "../configs/redis.config";
 

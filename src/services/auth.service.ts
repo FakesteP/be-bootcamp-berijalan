@@ -1,7 +1,11 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
-import { IDeleteResponse, IGlobalResponse, IUpdateResponse } from "../interfaces/global.interface";
-import { ILoginResponse } from "../interfaces/global.interface";
+import {
+  IDeleteResponse,
+  IGlobalResponse,
+  IUpdateResponse,
+} from "../interfaces/global.interface";
+import { ILoginResponse } from "../interfaces/auth.interface";
 import { UGenerateToken } from "../utils/jwt.util";
 
 const prisma = new PrismaClient();
@@ -26,12 +30,7 @@ export const SLogin = async (
     throw Error("password salah");
   }
 
-  const token = UGenerateToken({
-    id: admin.id,
-    username: admin.username,
-    email: admin.email,
-    name: admin.name,
-  });
+  const token = UGenerateToken(admin);
 
   return {
     status: true,
@@ -68,12 +67,7 @@ export const SRegister = async (
     },
   });
 
-  const token = UGenerateToken({
-    id: admin.id,
-    username: admin.username,
-    email: admin.email,
-    name: admin.name,
-  });
+  const token = UGenerateToken(admin);
 
   return {
     status: true,
@@ -130,22 +124,22 @@ export const SDelete = async (
     data: {
       deletedAt: new Date(),
       updatedAt: new Date(),
-    }, 
+    },
     select: {
       id: true,
       username: true,
       email: true,
       name: true,
       deletedAt: true,
-    } 
+    },
   });
 
-  return { 
+  return {
     status: true,
     message: "Berhail menghapus admin",
     data: admin,
   };
-}
+};
 
 export const SGetAllAdmins = async (): Promise<IGlobalResponse> => {
   const admins = await prisma.admin.findMany({

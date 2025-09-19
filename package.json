@@ -17,6 +17,7 @@
     "express": "^5.1.0",
     "joi": "^18.0.1",
     "jsonwebtoken": "^9.0.2",
+    "node-cron": "^4.2.1",
     "redis": "^5.8.2"
   },
   "devDependencies": {
@@ -30,7 +31,7 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.9.2"
   },
-  "prisma" : {
+  "prisma": {
     "schema": "prisma/schema.prisma"
   }
 }
