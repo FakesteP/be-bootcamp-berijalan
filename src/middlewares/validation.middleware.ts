@@ -83,3 +83,18 @@ export const updateAdminSchema = Joi.object({
       "string.pattern.base": "Nama hanya boleh berisi huruf dan spasi",
     }),
 });
+
+export const counterSchema = Joi.object({
+  name: Joi.string().min(3).max(100).trim().required(),
+  maxQueue: Joi.number().min(1).required(),
+});
+
+export const updateCounterSchema = Joi.object({
+  name: Joi.string().min(3).max(100).trim().optional(),
+  maxQueue: Joi.number().min(1).optional(),
+  isActive: Joi.boolean().optional(),
+});
+
+export const updateCounterStatusSchema = Joi.object({
+  status: Joi.string().valid("active", "inactive", "disable").required(),
+});

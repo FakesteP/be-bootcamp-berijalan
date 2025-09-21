@@ -166,3 +166,31 @@ export const SGetAllAdmins = async (): Promise<IGlobalResponse> => {
     data: admins,
   };
 };
+
+export const SGetAdminById = async (
+  id: number
+): Promise<IGlobalResponse> => {
+  const admin = await prisma.admin.findFirst({
+    where: {
+      id,
+      deletedAt: null,
+    },
+    select: {
+      id: true,
+      username: true,
+      email: true,
+      name: true,
+      isActive: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+  if (!admin) {
+    throw new Error("Admin not found");
+  }
+  return {
+    status: true,
+    message: "Admin retrieved successfully",
+    data: admin,
+  };
+};

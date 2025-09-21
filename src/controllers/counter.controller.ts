@@ -1,86 +1,98 @@
 import { Request, Response, NextFunction } from "express";
-import { SDelete, SGetAdminById, SGetAllAdmins, SLogin, SRegister, SUpdate } from "../services/auth.service";
+import {
+  SGetCounter,
+  SCreateCounter,
+  SDeleteCounter,
+  SGetAllCounters,
+  SUpdateCounter,
+  SUpdateCounterStatus,
+} from "../services/counter.service";
 
-export const CLogin = async (
+// Get counter by ID
+export const CGetCounter = async (
   req: Request,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { usernameOrEmail, password } = req.body;
-    const result = await SLogin(usernameOrEmail, password);
-
+    const id = Number(req.params.id);
+    const result = await SGetCounter(id);
     res.status(200).json(result);
   } catch (error) {
     next(error);
   }
 };
 
-export const CRegister = async (
+// Create counter
+export const CCreateCounter = async (
   req: Request,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { username, password, email, name } = req.body;
-    const result = await SRegister(username, password, email, name);
+    const { name, maxQueue } = req.body;
+    const result = await SCreateCounter(name, maxQueue);
     res.status(201).json(result);
   } catch (error) {
     next(error);
   }
 };
 
-export const CUpdate = async (
+// Delete counter
+export const CDeleteCounter = async (
   req: Request,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
   try {
     const id = Number(req.params.id);
-    const { username, password, email, name } = req.body;
-    const result = await SUpdate(id, username, password, email, name);
+    const result = await SDeleteCounter(id);
     res.status(200).json(result);
   } catch (error) {
     next(error);
   }
 };
 
-export const CDelete = async (
+// Get all counters
+export const CGetAllCounters = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const result = await SGetAllCounters();
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Update counter
+export const CUpdateCounter = async (
   req: Request,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
   try {
     const id = Number(req.params.id);
-    const result = await SDelete(id);
+    const { name, maxQueue, isActive } = req.body;
+    const result = await SUpdateCounter(id, name, maxQueue, isActive);
     res.status(200).json(result);
   } catch (error) {
     next(error);
   }
 };
 
-// admin controller
-export const CGetAllAdmins = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const result = await SGetAllAdmins();
-    res.status(200).json(result);
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const CGetAdminByID = async (
+// Update counter status
+export const CUpdateCounterStatus = async (
   req: Request,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
   try {
     const id = Number(req.params.id);
-    const result = await SGetAdminById(id);
+    const { status } = req.body; // status: "active" | "inactive" | "disable"
+    const result = await SUpdateCounterStatus(id, status);
     res.status(200).json(result);
   } catch (error) {
     next(error);

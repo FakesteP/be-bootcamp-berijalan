@@ -1,8 +1,10 @@
-import express from 'express';
-import cors from 'cors';
-import adminRouter from './routes/auth.routes';
-import { MErrorHandler } from './middlewares/error.middleware';
-import { connectRedis } from './configs/redis.config';
+import express from "express";
+import cors from "cors";
+import adminRouter from "./routes/auth.routes";
+import counterRoutes from "./routes/counter.routes";
+import queueRoutes from "./routes/queue.routes";
+import { MErrorHandler } from "./middlewares/error.middleware";
+import { connectRedis } from "./configs/redis.config";
 
 const app = express();
 
@@ -11,6 +13,8 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/api/v1/auth", adminRouter);
+app.use("/api/v1/counters", counterRoutes);
+app.use("/api/v1/queues", queueRoutes);
 
 app.use(MErrorHandler);
 
