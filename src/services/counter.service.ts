@@ -1,14 +1,14 @@
-import { PrismaClient } from "@prisma/client/extension";
+import { PrismaClient } from "@prisma/client";
 import { IGlobalResponse } from "../interfaces/global.interface";
 import bcrypt from "bcrypt";
 import { ICounterResponse } from "../interfaces/counter.interface";
 
-const prismaClient = new PrismaClient();
+const prisma = new PrismaClient();
 
 export const SGetAllCounters = async (): Promise<
   IGlobalResponse<ICounterResponse[]>
 > => {
-  const counter = await prismaClient.counter.findMany({
+  const counter = await prisma.counter.findMany({
     where: {
       isActive: true,
       deletedAt: null,
@@ -33,7 +33,7 @@ export const SGetAllCounters = async (): Promise<
 export const SGetCounter = async (
   id: number
 ): Promise<IGlobalResponse<ICounterResponse>> => {
-  const counter = await prismaClient.counter.findFirst({
+  const counter = await prisma.counter.findFirst({
     where: {
       id,
       isActive: true,
@@ -65,7 +65,7 @@ export const SCreateCounter = async (
   maxQueue: number
 ): Promise<IGlobalResponse<ICounterResponse>> => {
   try {
-    const counter = await prismaClient.counter.create({
+    const counter = await prisma.counter.create({
       data: {
         name,
         currentQueue: 0,
@@ -93,7 +93,7 @@ export const SUpdateCounter = async (
   isActive: boolean
 ): Promise<IGlobalResponse<ICounterResponse>> => {
   try {
-    const counter = await prismaClient.counter.update({
+    const counter = await prisma.counter.update({
       where: { id },
       data: {
         name,
@@ -114,7 +114,7 @@ export const SUpdateCounter = async (
 
 export const SDeleteCounter = async (id: number): Promise<IGlobalResponse> => {
   try {
-    await prismaClient.counter.update({
+    await prisma.counter.update({
       where: { id },
       data: { deletedAt: new Date() },
     });
@@ -145,7 +145,7 @@ export const SUpdateCounterStatus = async (
       updateData.deletedAt = new Date();
     }
 
-    const counter = await prismaClient.counter.update({
+    const counter = await prisma.counter.update({
       where: { id },
       data: {
         ...updateData,

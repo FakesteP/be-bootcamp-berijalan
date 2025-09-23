@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import {
   SClaimQueue,
   SCurrentQueue,
+  SGetAllQueues,
   SNextQueue,
   SReleaseQueue,
   SResetQueue,
@@ -90,6 +91,19 @@ export const CSkipQueue = async (
     const counterId = Number(req.params.counter_id);
     const result = await SSkipQueue(counterId);
 
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const CGetAllQueues = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const result = await SGetAllQueues();
     res.status(200).json(result);
   } catch (error) {
     next(error);

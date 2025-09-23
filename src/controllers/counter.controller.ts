@@ -32,7 +32,8 @@ export const CCreateCounter = async (
   try {
     const { name, maxQueue } = req.body;
     const result = await SCreateCounter(name, maxQueue);
-    res.status(201).json(result);
+
+    res.status(200).json(result);
   } catch (error) {
     next(error);
   }

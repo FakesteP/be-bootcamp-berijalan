@@ -23,12 +23,7 @@ import { MAuthValidate } from "../middlewares/auth.middleware";
 const router = Router();
 
 // Get all admins - auth required
-router.get(
-  "/admin",
-  MAuthValidate,
-  MCache(CachePresets.medium()),
-  CGetAllAdmins
-);
+router.get("/admin", MCache(CachePresets.medium()), CGetAllAdmins);
 
 // Get admin by ID - auth required
 router.get(
@@ -41,13 +36,12 @@ router.get(
 // Login - no auth required
 router.post("/login", MValidate(loginSchema), CLogin);
 
-// Create admin - auth required
+// Create admin
 router.post(
   "/create",
-  MAuthValidate,
   MValidate(newAdminSchema),
-  CRegister,
-  MInvalidateCache(["medium_cache:*"])
+  MInvalidateCache(["medium_cache:*"]),
+  CRegister
 );
 
 // Update admin - auth required
@@ -55,16 +49,16 @@ router.put(
   "/:id",
   MAuthValidate,
   MValidate(updateAdminSchema),
-  CUpdate,
-  MInvalidateCache(["medium_cache:*"])
+  MInvalidateCache(["medium_cache:*"]),
+  CUpdate
 );
 
 // Delete admin - auth required
 router.delete(
   "/:id",
   MAuthValidate,
-  CDelete,
-  MInvalidateCache(["medium_cache:*"])
+  MInvalidateCache(["medium_cache:*"]),
+  CDelete
 );
 
 export default router;

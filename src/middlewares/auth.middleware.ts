@@ -1,6 +1,8 @@
 import {NextFunction, Request, Response} from "express";
 import { UVerifyToken } from "../utils/jwt.util";
-import { PrismaClient } from "@prisma/client/extension";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 export const MAuthValidate = async(req: Request, res: Response, next: NextFunction) => {
   try {
@@ -13,7 +15,7 @@ export const MAuthValidate = async(req: Request, res: Response, next: NextFuncti
     
     const payload = await UVerifyToken(token);
 
-    const user = await PrismaClient.admin.findUnique({
+    const user = await prisma.admin.findUnique({
       where: { id: payload.id, deletedAt: null, isActive: true },
     });
 

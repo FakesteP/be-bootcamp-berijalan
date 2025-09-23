@@ -20,15 +20,16 @@ model Admin {
 }
 
 model Counter {
-  id            Int      @id @default(autoincrement())
-  name          String   @unique @db.VarChar(100)
-  currentQueue  Int      @default(0)
-  maxQueue      Int      @default(99)
-  queuesServed  Queue[]
-  isActive      Boolean  @default(true)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  deletedAt     DateTime?
+  id           Int       @id @default(autoincrement())
+  name         String    @unique
+  currentQueue Int       @default(0)
+  maxQueue     Int       @default(99)
+  queues       Int
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+  Queue        Queue[]
 }
 
 model Queue {

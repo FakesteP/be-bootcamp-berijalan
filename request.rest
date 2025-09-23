@@ -1,19 +1,35 @@
-### Pengujian API menggunakan REST Client
+###
+# ================================= #
+#       VARIABEL GLOBAL API         #
+# ================================= #
+@baseUrl = http://localhost:3000/api/v1
+@authToken = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJoaXJvamluIiwicGFzc3dvcmQiOiIkMmIkMTAkUjkwVFhRWmZkdmxTVUJJOE9aWVhOZS9aaFQvUWNHUVgzQm9idXNxYTJlZHRoeS5PTlFFQlciLCJlbWFpbCI6InBlYWNlb2ZtaW5kQGdtYWlsLmNvbSIsIm5hbWUiOiJIbk0iLCJpc0FjdGl2ZSI6dHJ1ZSwiY3JlYXRlZEF0IjoiMjAyNS0wOS0yMVQxNDoyMDoyNS45ODdaIiwidXBkYXRlZEF0IjoiMjAyNS0wOS0yMVQxNDoyMDoyNS45ODdaIiwiZGVsZXRlZEF0IjpudWxsLCJpYXQiOjE3NTg2MzU4OTEsImV4cCI6MTc1ODYzNzY5MX0.D4hSK0euuRrZeAMMWeO7CUG2CxtxQciZmJ7FOJr9kVM
+@adminId = 1
+@counterId = 1
+@queueId = 3
 
-GET http://localhost:3000/api/v1/auth/admin
 
+###
+# ================================= #
+#      FITUR 1: AUTENTIKASI (AUTH)      #
+# ================================= #
 
-### Login admin
-POST http://localhost:3000/api/v1/auth/login
+### [POST] Login sebagai Admin
+# Mendapatkan token JWT untuk request yang memerlukan autentikasi
+POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
 {
-  "usernameOrEmail": "",
-  "password": ""
+  "usernameOrEmail": "hirojin",
+  "password": "Hirojin#123"
 }
 
-### Create Admin
-POST http://localhost:3000/api/v1/auth/create
+### [GET] Mendapatkan data Admin yang sedang login
+GET {{baseUrl}}/auth/admin
+Authorization: {{authToken}}
+
+### [POST] Membuat Admin Baru
+POST {{baseUrl}}/auth/create
 Content-Type: application/json
 
 {
@@ -23,17 +39,94 @@ Content-Type: application/json
   "name": "Hirooo"
 }
 
-### Update Admin
-PUT http://localhost:3000/api/v1/auth/1
+### [PUT] Memperbarui Data Admin
+PUT {{baseUrl}}/auth/{{adminId}}
+Authorization: {{authToken}}
 Content-Type: application/json
 
 {
   "username": "gantengbanget",
-  "password": "1234",
   "email": "ganteng1234@gmail.com",
   "name": "Admin User Updated"
 }
 
-### Delete Admin
-DELETE http://localhost:3000/api/v1/auth/1
+### [DELETE] Menghapus Admin
+DELETE {{baseUrl}}/auth/{{adminId}}
+Authorization: {{authToken}}
+
+
+###
+# ================================= #
+#       FITUR 2: LOKET (COUNTERS)      #
+# ================================= #
+
+### [GET] Mendapatkan semua loket
+GET {{baseUrl}}/counters
+
+### [GET] Mendapatkan loket berdasarkan ID
+GET {{baseUrl}}/counters/{{counterId}}
+
+### [POST] Membuat loket baru
+POST {{baseUrl}}/counters
 Content-Type: application/json
+Authorization: {{authToken}}
+
+{
+  "name": "Loket Pendaftaran B",
+  "maxQueue": 100
+}
+
+### [PUT] Memperbarui loket
+PUT {{baseUrl}}/counters/{{counterId}}
+Content-Type: application/json
+Authorization: {{authToken}}
+
+{
+  "name": "Loket Pelayanan B (Updated)",
+  "maxQueue": 150,
+  "isActive": true
+}
+
+### [PUT] Memperbarui status loket (aktif/tidak aktif)
+PUT {{baseUrl}}/counters/{{counterId}}/status
+Content-Type: application/json
+Authorization: {{authToken}}
+
+{
+  "status": "inactive"
+}
+
+### [DELETE] Menghapus loket
+DELETE {{baseUrl}}/counters/{{counterId}}
+Authorization: {{authToken}}
+
+
+###
+# ================================= #
+#       FITUR 3: ANTRIAN (QUEUES)       #
+# ================================= #
+
+### [POST] Mengambil Nomor Antrean Baru
+POST {{baseUrl}}/queues/claim
+Content-Type: application/json
+
+### [GET] Melihat Semua Antrean
+GET {{baseUrl}}/queues/
+
+### [GET] Melihat Antrean Saat Ini di Sebuah Loket
+GET {{baseUrl}}/queues/current/{{counterId}}
+
+### [PUT] Panggil Antrean Berikutnya
+PUT {{baseUrl}}/queues/next/{{counterId}}
+Authorization: {{authToken}}
+
+### [PUT] Lewati Antrean
+PUT {{baseUrl}}/queues/skip/{{counterId}}
+Authorization: {{authToken}}
+
+### [PUT] Lepas/Batalkan Antrean Tertentu
+PUT {{baseUrl}}/queues/release/{{queueId}}
+
+### [DELETE] Reset Semua Antrean di Sebuah Loket
+DELETE {{baseUrl}}/queues/reset/{{counterId}}
+Authorization: {{authToken}}

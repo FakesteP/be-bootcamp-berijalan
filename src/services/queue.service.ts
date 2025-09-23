@@ -226,3 +226,24 @@ export const SSkipQueue = async (
     throw e;
   }
 };
+
+export const SGetAllQueues = async (): Promise<IGlobalResponse> => {
+  try {
+    const queues = await prismaClient.queue.findMany({
+      orderBy: {
+        createdAt: "asc", // Menampilkan dari antrean yang paling lama dibuat
+      },
+      include: {
+        counter: true, // Menyertakan detail loket untuk setiap antrean
+      },
+    });
+
+    return {
+      status: true,
+      message: "Successfully fetched all queues!",
+      data: queues,
+    };
+  } catch (e) {
+    throw e;
+  }
+};
