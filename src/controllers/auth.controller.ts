@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { SDelete, SGetAdminById, SGetAllAdmins, SLogin, SRegister, SUpdate } from "../services/auth.service";
+import { SDelete, SGetAdminById, SGetAllAdmins, SLogin, SLogout, SRegister, SToggleAdminStatus, SUpdate } from "../services/auth.service";
 
 export const CLogin = async (
   req: Request,
@@ -81,6 +81,47 @@ export const CGetAdminByID = async (
   try {
     const id = Number(req.params.id);
     const result = await SGetAdminById(id);
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const CToggleAdminStatus = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const id = parseInt(req.params.id);
+    const result = await SToggleAdminStatus(id);
+
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const CLogout = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    // Ambil token dari header (middleware MAuthValidate sudah verify token)
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(" ")[1];
+
+    if (!token) {
+      res.status(401).json({
+        status: false,
+        message: "Token tidak ditemukan",
+        data: null,
+      });
+      return;
+    }
+
+    const result = await SLogout(token);
     res.status(200).json(result);
   } catch (error) {
     next(error);

@@ -36,7 +36,7 @@ export const newAdminSchema = Joi.object({
     .required()
     .messages({
       "string.pattern.base":
-        "Password harus mengandung huruf besar, angka, dan simbol",
+        "Password harus mengandung huruf besar, angka, dan simbol (!@#$%^&*)",
     }),
   email: Joi.string()
     .email()
@@ -86,12 +86,13 @@ export const updateAdminSchema = Joi.object({
 
 export const counterSchema = Joi.object({
   name: Joi.string().min(3).max(100).trim().required(),
-  maxQueue: Joi.number().min(1).required(),
+  maxQueue: Joi.number().min(1).max(999).required(),
+  isActive: Joi.boolean().optional(),
 });
 
 export const updateCounterSchema = Joi.object({
-  name: Joi.string().min(3).max(100).trim().optional(),
-  maxQueue: Joi.number().min(1).optional(),
+  name: Joi.string().optional(),
+  maxQueue: Joi.number().min(1).max(999).optional(),
   isActive: Joi.boolean().optional(),
 });
 

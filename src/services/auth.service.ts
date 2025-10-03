@@ -7,6 +7,7 @@ import {
 } from "../interfaces/global.interface";
 import { ILoginResponse } from "../interfaces/auth.interface";
 import { UGenerateToken } from "../utils/jwt.util";
+import { error } from "console";
 
 const prisma = new PrismaClient();
 
@@ -167,9 +168,7 @@ export const SGetAllAdmins = async (): Promise<IGlobalResponse> => {
   };
 };
 
-export const SGetAdminById = async (
-  id: number
-): Promise<IGlobalResponse> => {
+export const SGetAdminById = async (id: number): Promise<IGlobalResponse> => {
   const admin = await prisma.admin.findFirst({
     where: {
       id,
@@ -193,4 +192,54 @@ export const SGetAdminById = async (
     message: "Admin retrieved successfully",
     data: admin,
   };
+};
+
+export const SToggleAdminStatus = async (
+  id: number
+): Promise<IGlobalResponse> => {
+  const admin = await prisma.admin.findFirst({
+    where: {
+      id,
+      deletedAt: null,
+    },
+  });
+
+  if (!admin) {
+    throw error("Admin not found");
+  }
+
+  const updatedAdmin = await prisma.admin.update({
+    where: { id },
+    data: {
+      isActive: !admin.isActive,
+      updatedAt: new Date(),
+    },
+  });
+
+  return {
+    status: true,
+    message: `Admin ${
+      updatedAdmin.isActive ? "activated" : "deactivated"
+    } successfully`,
+    data: {
+      id: updatedAdmin.id,
+      username: updatedAdmin.username,
+      email: updatedAdmin.email,
+      name: updatedAdmin.name,
+      isActive: updatedAdmin.isActive,
+    },
+  };
+};
+
+export const SLogout = async (token: string): Promise<IGlobalResponse> => {
+  try {
+    return {
+      status: true,
+      message: "Logout berhasil",
+      data: null,
+    };
+  } catch (error) {
+    console.error("Logout error:", error);
+    throw new Error("Gagal logout");
+  }
 };

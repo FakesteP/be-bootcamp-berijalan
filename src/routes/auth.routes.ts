@@ -4,7 +4,9 @@ import {
   CGetAdminByID,
   CGetAllAdmins,
   CLogin,
+  CLogout,
   CRegister,
+  CToggleAdminStatus,
   CUpdate,
 } from "../controllers/auth.controller";
 import {
@@ -12,6 +14,7 @@ import {
   newAdminSchema,
   loginSchema,
   updateAdminSchema,
+  updateCounterStatusSchema,
 } from "../middlewares/validation.middleware";
 import {
   CachePresets,
@@ -23,7 +26,7 @@ import { MAuthValidate } from "../middlewares/auth.middleware";
 const router = Router();
 
 // Get all admins - auth required
-router.get("/admin", MCache(CachePresets.medium()), CGetAllAdmins);
+router.get("/admins", CGetAllAdmins);
 
 // Get admin by ID - auth required
 router.get(
@@ -36,9 +39,13 @@ router.get(
 // Login - no auth required
 router.post("/login", MValidate(loginSchema), CLogin);
 
+// Logout - auth required
+router.post("/logout", MAuthValidate, CLogout);
+
 // Create admin
 router.post(
   "/create",
+  MAuthValidate,
   MValidate(newAdminSchema),
   MInvalidateCache(["medium_cache:*"]),
   CRegister
@@ -59,6 +66,15 @@ router.delete(
   MAuthValidate,
   MInvalidateCache(["medium_cache:*"]),
   CDelete
+);
+
+
+router.put(
+  "/:id/toggle-status",
+  MAuthValidate,
+  MValidate(updateCounterStatusSchema),
+  CToggleAdminStatus,
+  MInvalidateCache(["medium_cache:*", "user_cache:*"])
 );
 
 export default router;

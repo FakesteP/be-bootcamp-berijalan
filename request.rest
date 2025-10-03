@@ -2,8 +2,8 @@
 # ================================= #
 #       VARIABEL GLOBAL API         #
 # ================================= #
-@baseUrl = http://localhost:3000/api/v1
-@authToken = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJoaXJvamluIiwicGFzc3dvcmQiOiIkMmIkMTAkUjkwVFhRWmZkdmxTVUJJOE9aWVhOZS9aaFQvUWNHUVgzQm9idXNxYTJlZHRoeS5PTlFFQlciLCJlbWFpbCI6InBlYWNlb2ZtaW5kQGdtYWlsLmNvbSIsIm5hbWUiOiJIbk0iLCJpc0FjdGl2ZSI6dHJ1ZSwiY3JlYXRlZEF0IjoiMjAyNS0wOS0yMVQxNDoyMDoyNS45ODdaIiwidXBkYXRlZEF0IjoiMjAyNS0wOS0yMVQxNDoyMDoyNS45ODdaIiwiZGVsZXRlZEF0IjpudWxsLCJpYXQiOjE3NTg2MzU4OTEsImV4cCI6MTc1ODYzNzY5MX0.D4hSK0euuRrZeAMMWeO7CUG2CxtxQciZmJ7FOJr9kVM
+@baseUrl = http://localhost:5000/api/v1
+@authToken = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJBdG1pbiIsInBhc3N3b3JkIjoiJDJiJDEwJEx5ZXJMOFVMTzRUTWdpNkhTZW14QmVhcmRHVFMvaTI2bTFqWEhvZ1h0VGVneXYxQjJRalVHIiwiZW1haWwiOiJFdG1pbkBnbWFpbC5jb20iLCJuYW1lIjoiYXRlbWluIiwiaXNBY3RpdmUiOnRydWUsImNyZWF0ZWRBdCI6IjIwMjUtMDktMjlUMDY6MTQ6NDMuMDY5WiIsInVwZGF0ZWRBdCI6IjIwMjUtMDktMjlUMDY6MTQ6NDMuMDY5WiIsImRlbGV0ZWRBdCI6bnVsbCwiaWF0IjoxNzU5NDk0MjgyLCJleHAiOjE3NTk0OTYwODJ9.jNS2Cwc1_1rB9CflgQ1PQ27h3hB02VU8hP46y2iPJR8
 @adminId = 1
 @counterId = 1
 @queueId = 3
@@ -14,44 +14,53 @@
 #      FITUR 1: AUTENTIKASI (AUTH)      #
 # ================================= #
 
+### [GET] GET semua admin
+GET {{baseUrl}}/auth/admins
+
+### [POST] Logout
+POST {{baseUrl}}/auth/logout
+Authorization: {{authToken}}
+Content-Type: application/json
+
 ### [POST] Login sebagai Admin
-# Mendapatkan token JWT untuk request yang memerlukan autentikasi
 POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
 {
-  "usernameOrEmail": "hirojin",
-  "password": "Hirojin#123"
+  "usernameOrEmail": "Atmin",
+  "password": "Atmin#666"
 }
-
-### [GET] Mendapatkan data Admin yang sedang login
-GET {{baseUrl}}/auth/admin
-Authorization: {{authToken}}
 
 ### [POST] Membuat Admin Baru
 POST {{baseUrl}}/auth/create
-Content-Type: application/json
-
-{
-  "username": "hirojin",
-  "password": "FakesteP#666",
-  "email": "xxrabka@gmail.com",
-  "name": "Hirooo"
-}
-
-### [PUT] Memperbarui Data Admin
-PUT {{baseUrl}}/auth/{{adminId}}
 Authorization: {{authToken}}
 Content-Type: application/json
 
 {
-  "username": "gantengbanget",
+  "username": "Atmin",
+  "password": "Atmin#666",
+  "email": "Etmin@gmail.com",
+  "name": "atemin"
+}
+
+### [PUT] Memperbarui Data Admin
+PUT {{baseUrl}}/auth/2
+Authorization: {{authToken}}
+Content-Type: application/json
+
+{
+  "username": "Gans",
+  "password": "Gans#123",
   "email": "ganteng1234@gmail.com",
   "name": "Admin User Updated"
 }
 
 ### [DELETE] Menghapus Admin
-DELETE {{baseUrl}}/auth/{{adminId}}
+DELETE {{baseUrl}}/auth/6
+Authorization: {{authToken}}
+
+###
+PUT  {{baseUrl}}/auth/1/toggle-status
 Authorization: {{authToken}}
 
 
@@ -73,7 +82,7 @@ Authorization: {{authToken}}
 
 {
   "name": "Loket Pendaftaran B",
-  "maxQueue": 100
+  "maxQueue": 30
 }
 
 ### [PUT] Memperbarui loket
@@ -82,7 +91,7 @@ Content-Type: application/json
 Authorization: {{authToken}}
 
 {
-  "name": "Loket Pelayanan B (Updated)",
+  "name": "Loket Pelayanan A (Updated)",
   "maxQueue": 150,
   "isActive": true
 }
@@ -111,21 +120,29 @@ POST {{baseUrl}}/queues/claim
 Content-Type: application/json
 
 ### [GET] Melihat Semua Antrean
-GET {{baseUrl}}/queues/
+GET {{baseUrl}}/queues/current
+
+
+### [GET] Melihat Semua Antrean
+GET {{baseUrl}}/queues/metrics
 
 ### [GET] Melihat Antrean Saat Ini di Sebuah Loket
 GET {{baseUrl}}/queues/current/{{counterId}}
 
 ### [PUT] Panggil Antrean Berikutnya
-PUT {{baseUrl}}/queues/next/{{counterId}}
+POST {{baseUrl}}/queues/next/
 Authorization: {{authToken}}
+Content-Type: application/json
 
+{
+  "counter_id": 1
+}
 ### [PUT] Lewati Antrean
 PUT {{baseUrl}}/queues/skip/{{counterId}}
 Authorization: {{authToken}}
 
 ### [PUT] Lepas/Batalkan Antrean Tertentu
-PUT {{baseUrl}}/queues/release/{{queueId}}
+PUT {{baseUrl}}/queues/release/6
 
 ### [DELETE] Reset Semua Antrean di Sebuah Loket
 DELETE {{baseUrl}}/queues/reset/{{counterId}}

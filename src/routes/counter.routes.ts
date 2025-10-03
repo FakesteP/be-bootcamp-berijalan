@@ -1,17 +1,13 @@
 import { Router } from "express";
 import {
-  CGetCounter,
   CCreateCounter,
   CDeleteCounter,
   CGetAllCounters,
   CUpdateCounter,
-  CUpdateCounterStatus,
+  CGetCounterById,
+  CToggleCounterStatus,
 } from "../controllers/counter.controller";
-import {
-  MCache,
-  CachePresets,
-  MInvalidateCache,
-} from "../middlewares/cache.middleware";
+import { MCache, CachePresets } from "../middlewares/cache.middleware";
 import {
   MValidate,
   counterSchema,
@@ -19,48 +15,28 @@ import {
   updateCounterStatusSchema,
 } from "../middlewares/validation.middleware";
 import { MAuthValidate } from "../middlewares/auth.middleware";
+import { count } from "console";
 
 const router = Router();
 
-// Get all counters - no auth required
-router.get("/", MCache(CachePresets.medium()), CGetAllCounters);
+router.get("/", CGetAllCounters);
+router.get("/:id", CGetCounterById);
+router.post("/", MAuthValidate, MValidate(counterSchema), CCreateCounter);
 
-// Get counter by ID - no auth required
-router.get("/:id", MCache(CachePresets.medium()), CGetCounter);
-
-// Create counter - auth required
-router.post(
-  "/",
-  MAuthValidate,
-  MValidate(counterSchema),
-  CCreateCounter,
-  MInvalidateCache(["medium_cache:*"])
-);
-
-// Update counter - auth required
 router.put(
   "/:id",
   MAuthValidate,
   MValidate(updateCounterSchema),
-  CUpdateCounter,
-  MInvalidateCache(["medium_cache:*"])
+  CUpdateCounter
 );
 
-// Update counter status - auth required
 router.put(
   "/:id/status",
   MAuthValidate,
   MValidate(updateCounterStatusSchema),
-  CUpdateCounterStatus,
-  MInvalidateCache(["medium_cache:*"])
+  CToggleCounterStatus
 );
 
-// Delete counter - auth required
-router.delete(
-  "/:id",
-  MAuthValidate,
-  CDeleteCounter,
-  MInvalidateCache(["medium_cache:*"])
-);
+router.delete("/:id", MAuthValidate, CDeleteCounter);
 
 export default router;

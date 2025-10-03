@@ -1,164 +1,176 @@
 import { PrismaClient } from "@prisma/client";
 import { IGlobalResponse } from "../interfaces/global.interface";
-import bcrypt from "bcrypt";
-import { ICounterResponse } from "../interfaces/counter.interface";
 
 const prisma = new PrismaClient();
 
-export const SGetAllCounters = async (): Promise<
-  IGlobalResponse<ICounterResponse[]>
-> => {
-  const counter = await prisma.counter.findMany({
-    where: {
-      isActive: true,
-      deletedAt: null,
-    },
-    select: {
-      id: true,
-      name: true,
-      currentQueue: true,
-      maxQueue: true,
-      queues: true,
-      isActive: true,
-    },
+export const SGetAllCounters = async (
+  includeInactive: boolean = false
+): Promise<IGlobalResponse> => {
+  const whereCondition: any = { deletedAt: null };
+  if (!includeInactive) whereCondition.isActive = true;
+
+  const counters = await prisma.counter.findMany({
+    where: whereCondition,
+    orderBy: { createdAt: "desc" },
   });
 
   return {
     status: true,
-    message: "Get counters success",
-    data: counter,
+    message: "Counters retrieved successfully",
+    data: counters,
   };
 };
 
-export const SGetCounter = async (
-  id: number
-): Promise<IGlobalResponse<ICounterResponse>> => {
+export const SGetCounterById = async (id: number): Promise<IGlobalResponse> => {
   const counter = await prisma.counter.findFirst({
-    where: {
-      id,
-      isActive: true,
-      deletedAt: null,
-    },
-    select: {
-      id: true,
-      name: true,
-      currentQueue: true,
-      maxQueue: true,
-      queues: true,
-      isActive: true,
-    },
+    where: { id, deletedAt: null },
   });
 
-  if (!counter) {
-    throw new Error("Counter not found");
-  }
+  if (!counter) throw new Error("Counter not found");
+
+  const activeQueue = await prisma.queue.findFirst({
+    where: {
+      counterId: id,
+      status: { in: ["CLAIMED", "CALLED"] },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  if (!activeQueue) throw new Error("No active queue found for this counter");
 
   return {
     status: true,
-    message: "Get counter success",
-    data: counter,
+    message: "Counter retrieved successfully",
+    data: {
+      ...counter,
+      activeQueueNumber: activeQueue.number,
+      activeQueueStatus: activeQueue.status,
+    },
   };
 };
 
 export const SCreateCounter = async (
   name: string,
-  maxQueue: number
-): Promise<IGlobalResponse<ICounterResponse>> => {
-  try {
-    const counter = await prisma.counter.create({
-      data: {
-        name,
-        currentQueue: 0,
-        maxQueue,
-        queues: 0,
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    });
-    return {
-      status: true,
-      message: "Berhasil membuat counter!",
-      data: counter,
-    };
-  } catch (e) {
-    throw e;
-  }
+  maxQueue: number,
+  isActive: boolean = true
+): Promise<IGlobalResponse> => {
+  if (!name || name.trim().length === 0)
+    throw new Error("Counter name is required");
+  if (maxQueue < 1 || maxQueue > 999)
+    throw new Error("Max queue must be between 1 and 999");
+
+  const existingCounter = await prisma.counter.findFirst({
+    where: { name: name.trim(), deletedAt: null, isActive },
+  });
+
+  if (existingCounter) throw new Error("Counter with this name already exists");
+
+  const counter = await prisma.counter.create({
+    data: {
+      name: name.trim(),
+      maxQueue,
+      currentQueue: 0,
+      isActive: true,
+    },
+  });
+
+  return {
+    status: true,
+    message: "Counter created successfully",
+    data: counter,
+  };
 };
 
 export const SUpdateCounter = async (
   id: number,
-  name: string,
-  maxQueue: number,
-  isActive: boolean
-): Promise<IGlobalResponse<ICounterResponse>> => {
-  try {
-    const counter = await prisma.counter.update({
-      where: { id },
-      data: {
-        name,
-        maxQueue,
-        isActive,
-        updatedAt: new Date(),
-      },
+  name?: string,
+  maxQueue?: number,
+  isActive?: boolean
+): Promise<IGlobalResponse> => {
+  const counter = await prisma.counter.findFirst({
+    where: { id, deletedAt: null },
+  });
+  if (!counter) throw new Error("Counter not found");
+
+  if (name !== undefined) {
+    if (!name || name.trim().length === 0)
+      throw new Error("Counter name is required");
+
+    const existingCounter = await prisma.counter.findFirst({
+      where: { name: name.trim(), deletedAt: null, NOT: { id } },
     });
-    return {
-      status: true,
-      message: "Berhasil memperbarui counter!",
-      data: counter,
-    };
-  } catch (e) {
-    throw e;
+    if (existingCounter)
+      throw new Error("Counter with this name already exists");
   }
+
+  if (maxQueue !== undefined && (maxQueue < 1 || maxQueue > 999))
+    throw new Error("Max queue must be between 1 and 999");
+
+  const updateData: any = { updatedAt: new Date() };
+  if (name !== undefined) updateData.name = name.trim();
+  if (maxQueue !== undefined) updateData.maxQueue = maxQueue;
+  if (isActive !== undefined) updateData.isActive = isActive;
+
+  const updatedCounter = await prisma.counter.update({
+    where: { id },
+    data: updateData,
+  });
+
+  return {
+    status: true,
+    message: "Counter updated successfully",
+    data: updatedCounter,
+  };
 };
 
 export const SDeleteCounter = async (id: number): Promise<IGlobalResponse> => {
-  try {
-    await prisma.counter.update({
-      where: { id },
-      data: { deletedAt: new Date() },
-    });
-    return {
-      status: true,
-      message: "Berhasil menghapus counter!",
-    };
-  } catch (e) {
-    throw e;
-  }
+  const counter = await prisma.counter.findFirst({
+    where: { id, deletedAt: null },
+  });
+  if (!counter) throw new Error("Counter not found");
+
+  const activeQueueCount = await prisma.queue.count({
+    where: { counterId: id, status: { in: ["CLAIMED", "CALLED"] } },
+  });
+  if (activeQueueCount > 0)
+    throw new Error("Cannot delete counter with active queues");
+
+  await prisma.counter.update({
+    where: { id },
+    data: {
+      deletedAt: new Date(),
+      isActive: false,
+      updatedAt: new Date(),
+    },
+  });
+
+  return {
+    status: true,
+    message: "Counter deleted successfully",
+  };
 };
 
-export const SUpdateCounterStatus = async (
-  id: number,
-  status: "active" | "inactive" | "disable"
-): Promise<IGlobalResponse<ICounterResponse>> => {
-  try {
-    let updateData: any = {};
+export const SToggleCounterStatus = async (
+  id: number
+): Promise<IGlobalResponse> => {
+  const counter = await prisma.counter.findFirst({
+    where: { id, deletedAt: null },
+  });
+  if (!counter) throw new Error("Counter not found");
 
-    if (status === "active") {
-      updateData.isActive = true;
-      updateData.deletedAt = null;
-    } else if (status === "inactive") {
-      updateData.isActive = false;
-      updateData.deletedAt = null;
-    } else if (status === "disable") {
-      updateData.isActive = false;
-      updateData.deletedAt = new Date();
-    }
+  const updatedCounter = await prisma.counter.update({
+    where: { id },
+    data: {
+      isActive: !counter.isActive,
+      updatedAt: new Date(),
+    },
+  });
 
-    const counter = await prisma.counter.update({
-      where: { id },
-      data: {
-        ...updateData,
-        updatedAt: new Date(),
-      },
-    });
-
-    return {
-      status: true,
-      message: `Counter status berhasil diubah ke ${status}!`,
-      data: counter,
-    };
-  } catch (e) {
-    throw e;
-  }
+  return {
+    status: true,
+    message: `Counter ${
+      updatedCounter.isActive ? "activated" : "deactivated"
+    } successfully`,
+    data: updatedCounter,
+  };
 };
